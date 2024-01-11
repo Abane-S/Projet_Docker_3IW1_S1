@@ -1,0 +1,109 @@
+# # Set the error log file path
+# error_log /var/log/nginx/error.log;
+
+# # Set the pid file path
+# pid /var/run/nginx.pid;
+
+# # Configure events section
+events {
+    worker_connections 1024;
+}
+
+
+
+# http{
+
+#     include /etc/nginx/mime.types;
+#     default_type application/octet-stream;
+
+#     # Set the access log file path
+#     access_log /var/log/nginx/access.log;
+
+
+#     server {
+#         listen 80;
+#         server_name localhost;
+
+#         root /var/www/html;
+#         index index.php index.html index.htm;
+
+#         location / {
+#             try_files $uri $uri/ /index.php?$query_string;
+#         }
+
+#         location ~ \.php$ {
+#             try_files $uri =404;
+#             fastcgi_split_path_info ^(.+\.php)(/.+)$;
+#             fastcgi_pass php1:9000;
+#             fastcgi_index index.php;
+#             include fastcgi_params;
+#             fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+#             fastcgi_param PATH_INFO $fastcgi_path_info;
+#         }
+
+#         # Custom settings for Server 1
+#         location = /index.php {
+#             rewrite ^ /welcome.php;
+#         }
+#     }
+
+# }
+
+
+
+
+
+
+    # We execute the composer install command
+    docker exec $id composer install > /dev/null 2>&1
+    # Show a message
+    echo "Composer install done for $id"
+
+    # We execute the npm install command	
+    docker exec $id npm install > /dev/null 2>&1
+    # Show a message
+    echo "Npm install done for $id"
+
+    # We execute the npm run build command
+    docker exec $id npm run build > /dev/null 2>&1
+    # Show a message
+    echo "Npm run build done for $id"
+
+
+
+
+
+
+
+
+    # Use an official PHP runtime with FPM
+FROM php:8.2-fpm
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    sudo 
+
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql 
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Install Node.js et npm
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN apt-get install -y nodejs
+RUN apt-get install -y npm
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Expose port 9000
+EXPOSE 9000
